@@ -1,0 +1,13 @@
+---
+- include: ansible_aws.yaml
+- include: jenkins.yaml
+
+- include: ansible_aws.yaml
+- include: mysql.yaml
+
+- include: ansible_aws.yaml
+- include: httpd.yaml
+
+- include: ansible_aws.yaml
+- include: tomcat.yaml
+

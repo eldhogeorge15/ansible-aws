@@ -1,0 +1,40 @@
+- hosts: launched
+  user: ec2-user
+  sudo: yes
+
+  tasks:
+    - name: Install HTTPD
+      yum: name=httpd state=present
+
+    - name: Ensure httpd is running
+      service:
+       name=httpd
+       state=started
+
+    - name: Ensure httpd is enabled
+      service:
+       name=httpd
+       enabled=yes
+
+    - name: Create sites.d directory
+      file:
+       path=/etc/httpd/conf.d/sites.d
+       state=directory
+       owner=root
+       group=root
+       mode=0755
+
+    - name: Add sites.d Include to httpd.conf
+      lineinfile:
+       dest=/etc/httpd/conf/httpd.conf
+       state=present
+       line='Include conf.d/sites.d/*.conf'
+      notify:
+      - restart httpd
+
+  handlers:
+  - name: restart httpd
+    service:
+      name=httpd
+      state=restarted
+

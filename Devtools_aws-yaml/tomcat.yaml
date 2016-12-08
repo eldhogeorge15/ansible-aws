@@ -1,0 +1,65 @@
+- hosts: launched
+  user: ec2-user
+  sudo: yes
+
+  vars:
+   http_port: 8080
+   https_port: 8443
+   admin_username: admin
+   admin_password: adminsecret
+
+  tasks:
+
+    - name: Install Java 1.7
+      yum: name=java-1.7.0-openjdk state=present
+
+    - name: Download Tomcat
+      get_url: url=http://www-us.apache.org/dist/tomcat/tomcat-7/v7.0.73/bin/apache-tomcat-7.0.73.tar.gz dest=/opt/apache-tomcat-7.0.73.tar.gz
+
+
+    - name: Extract archive
+      command: chdir=/usr/share /bin/tar xvf /opt/apache-tomcat-7.0.73.tar.gz -C /usr/share/ creates=/usr/share/tomcat
+
+    - name: Symlink install directory
+      file: src=/usr/share/apache-tomcat-7.0.73 path=/usr/share/tomcat state=link
+
+    - name: Add group "tomcat"
+      group: name=tomcat
+
+    - name: Add user "tomcat"
+      user: name=tomcat group=tomcat home=/usr/share/tomcat
+
+    - name: Change ownership of Tomcat installation
+      file: path=/usr/share/tomcat/ owner=tomcat group=tomcat state=directory recurse=yes
+
+    - name: Configure Tomcat server
+      template: src=./files/server.xml dest=/usr/share/tomcat/conf/
+      notify: restart tomcat
+
+    - name: Configure Tomcat users
+      template: src=./files/tomcat-users.xml dest=/usr/share/tomcat/conf/
+      notify: restart tomcat
+
+    - name: Install Tomcat init script
+      copy: src=./files/tomcat-initscript.sh dest=/etc/init.d/tomcat mode=0755
+
+    - name: Start Tomcat
+      service: name=tomcat state=started 
+
+    - name: deploy iptables rules
+      template: src=./files/iptables-save dest=/etc/sysconfig/iptables
+      notify: restart iptables
+
+    - name: wait for tomcat to start
+      wait_for: port={{http_port}}
+
+
+
+  handlers:
+
+      - name: restart tomcat
+        service: name=tomcat state=restarted
+
+      - name: restart iptables
+        service: name=iptables state=restarted
+

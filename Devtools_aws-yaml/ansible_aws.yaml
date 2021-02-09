@@ -24,8 +24,8 @@
                       region={{ region }} 
                       keypair={{ keypair }}
                       count={{count}} 
-                      aws_access_key=AKIAJLCDRARG2N6TPIQQ
-                      aws_secret_key=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
+                      aws_access_key=xxxxxxxxxxxxxxxxxxxx
+                      aws_secret_key=xxxxxxxxxxxxxxxxxx
         register: ec2
 
       - name: Add the newly created EC2 instance(s) to the local host group (located inside the directory)
